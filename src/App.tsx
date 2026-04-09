@@ -49,6 +49,10 @@ export default function App() {
   // Dynamic Chart Data
   const currentChartData = selectedYear === '2026' ? MONTHLY_DATA : MONTHLY_DATA.map(d => ({ ...d, km: 0 }));
   const totalKmForYear = currentChartData.reduce((acc, curr) => acc + curr.km, 0);
+
+  // System Telemetry Count (Items at 100% or more)
+  const criticalCount = maintenanceItems.filter(item => !item.isMaster && (item.current / item.interval) >= 1).length;
+
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configType, setConfigType] = useState<'odo' | 'compliance' | 'item' | 'add_item' | 'edit_name' | null>(null);
   const [editingItem, setEditingItem] = useState<{ id: string, name: string, value: number | string, type: 'interval' | 'current' | 'name' } | null>(null);
@@ -176,7 +180,7 @@ export default function App() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter italic leading-none">
-              RACING DNA <span className="text-racing-red">UNLEASHED</span>
+              GIXXER <span className="text-racing-red">Airelines</span>
             </h1>
           </div>
           <p className="text-[11px] font-bold text-racing-text-gray mt-3 uppercase tracking-[0.3em]">
@@ -201,7 +205,7 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto space-y-8">
         {/* Top Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
           {/* Global Odometer */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -239,12 +243,17 @@ export default function App() {
           >
             <div className="flex justify-between items-start mb-6">
               <h3 className="text-[12px] font-bold uppercase tracking-widest text-racing-text-gray">System Telemetry</h3>
-              <Activity className="w-5 h-5 text-racing-green" />
+              <Activity className={cn("w-5 h-5 transition-colors", criticalCount > 0 ? "text-racing-red" : "text-racing-green")} />
             </div>
-            <p className="text-[12px] font-bold text-racing-green uppercase tracking-widest mb-10">Nominal Status</p>
+            <p className={cn(
+              "text-[12px] font-bold uppercase tracking-widest mb-10 transition-colors",
+              criticalCount > 0 ? "text-racing-red" : "text-racing-green"
+            )}>
+              {criticalCount > 0 ? "Attention Required" : "Nominal Status"}
+            </p>
             
-            <div className="flex items-center gap-8 mb-10">
-              <div className="relative w-28 h-28 flex items-center justify-center">
+            <div className="flex items-center gap-10 mb-10">
+              <div className="relative w-28 h-28 flex items-center justify-center flex-shrink-0">
                 <svg className="absolute inset-0 w-full h-full -rotate-90">
                   <circle
                     cx="56"
@@ -264,17 +273,26 @@ export default function App() {
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeDasharray="1 10"
-                    className="text-racing-green"
+                    className={cn("transition-colors", criticalCount > 0 ? "text-racing-red" : "text-racing-green")}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                   />
                 </svg>
-                <span className="text-4xl font-mono font-bold text-racing-border">00</span>
+                <span className={cn(
+                  "text-4xl font-mono font-bold transition-colors",
+                  criticalCount > 0 ? "text-racing-red" : "text-racing-border"
+                )}>
+                  {criticalCount.toString().padStart(2, '0')}
+                </span>
               </div>
-              <div>
-                <h4 className="text-[13px] font-bold uppercase tracking-wider mb-2 text-racing-text-white">All Systems Verified</h4>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-[13px] font-bold uppercase tracking-wider mb-2 text-racing-text-white">
+                  {criticalCount > 0 ? `${criticalCount} Items Critical` : "All Systems Verified"}
+                </h4>
                 <p className="text-[11px] text-racing-text-gray leading-relaxed uppercase tracking-tighter">
-                  Maintenance intervals within<br />projected safety envelopes.
+                  {criticalCount > 0 
+                    ? "Immediate maintenance required\nfor highlighted components."
+                    : "Maintenance intervals within\nprojected safety envelopes."}
                 </p>
               </div>
             </div>
@@ -381,7 +399,7 @@ export default function App() {
                         textAnchor="middle"
                         fill={payload.value === 'APR' ? '#A1142B' : '#98A2B3'}
                         className={cn(
-                          "text-[10px] font-black uppercase tracking-widest",
+                          "text-[14px] font-black uppercase tracking-widest",
                           payload.value === 'APR' && "underline underline-offset-[12px] decoration-[3px]"
                         )}
                       >
@@ -393,11 +411,13 @@ export default function App() {
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#98A2B3', fontSize: 10, fontWeight: 900 }}
+                  tick={{ fill: '#98A2B3', fontSize: 13, fontWeight: 900 }}
                 />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                  contentStyle={{ backgroundColor: '#12151A', border: '1px solid #2A313B', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', color: '#F5F7FA' }}
+                  contentStyle={{ backgroundColor: '#12151A', border: '1px solid #2A313B', borderRadius: '12px', fontSize: '14px', fontWeight: 'bold' }}
+                  itemStyle={{ color: '#F5F7FA' }}
+                  labelStyle={{ color: '#F5F7FA', marginBottom: '4px' }}
                 />
                 <Bar dataKey="km" radius={[4, 4, 0, 0]} barSize={60}>
                   {MONTHLY_DATA.map((entry, index) => (
@@ -507,7 +527,7 @@ export default function App() {
                               animate={{ width: `${percentage}%` }}
                               className={cn(
                                 "progress-bar-fill",
-                                isCritical ? "bg-racing-red shadow-[0_0_12px_rgba(161,20,43,0.8)]" : isWarning ? "bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)]" : "bg-racing-green shadow-[0_0_12px_rgba(34,197,94,0.8)]"
+                                isCritical ? "bg-racing-red shadow-[0_0_12px_rgba(161,20,43,0.8)]" : isWarning ? "bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)]" : "bg-racing-green shadow-[0_0_12px_rgba(45,235,219,0.8)]"
                               )}
                             />
                           </div>
