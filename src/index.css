@@ -3,7 +3,7 @@
 @theme {
   --color-racing-red: #A1142B;
   --color-racing-red-hover: #C61C39;
-  --color-racing-green: #22C55E;
+  --color-racing-green: #2debdb;
   --color-racing-black: #0A0B0D;
   --color-racing-dark: #12151A;
   --color-racing-border: #2A313B;
@@ -48,7 +48,7 @@
 }
 
 .status-dot-online {
-  @apply bg-racing-green shadow-[0_0_10px_rgba(34,197,94,0.8)];
+  @apply bg-racing-green shadow-[0_0_10px_rgba(45,235,219,0.8)];
 }
 
 .text-glow-red {
@@ -56,7 +56,7 @@
 }
 
 .text-glow-green {
-  @apply text-racing-green drop-shadow-[0_0_12px_rgba(34,197,94,0.8)];
+  @apply text-racing-green drop-shadow-[0_0_12px_rgba(45,235,219,0.8)];
 }
 
 /* Custom scrollbar for the table */
