@@ -180,7 +180,7 @@ export default function App() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter italic leading-none">
-              GIXXER <span className="text-racing-red">Airelines</span>
+              GIXXER <span className="text-racing-red">Airlines</span>
             </h1>
           </div>
           <p className="text-[11px] font-bold text-racing-text-gray mt-3 uppercase tracking-[0.3em]">
